@@ -1,0 +1,14 @@
+{
+  "LAB-TEST-01": {
+    "used": false,
+    "expires_at": "2099-12-31T23:59:59Z"
+  },
+  "LAB-USED-01": {
+    "used": true,
+    "expires_at": "2099-12-31T23:59:59Z"
+  },
+  "LAB-EXPIRED-01": {
+    "used": false,
+    "expires_at": "2020-01-01T00:00:00Z"
+  }
+}
