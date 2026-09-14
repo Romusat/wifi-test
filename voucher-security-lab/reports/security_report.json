@@ -11,8 +11,8 @@
     },
     {
         "test": "Valid voucher",
-        "status": "PASS",
-        "detail": "Voucher test diterima."
+        "status": "FAIL",
+        "detail": "Voucher test tidak diterima: 403 {'error': 'voucher_used', 'success': False}"
     },
     {
         "test": "Voucher reuse protection",
@@ -33,5 +33,20 @@
         "test": "Information disclosure",
         "status": "PASS",
         "detail": "Tidak terlihat informasi error internal."
+    },
+    {
+        "test": "Voucher generator (text)",
+        "status": "PASS",
+        "detail": "Berhasil membuat 2 voucher text: ['GEN-J197TZ', 'GEN-ILZ0NW']"
+    },
+    {
+        "test": "Generated voucher validation",
+        "status": "PASS",
+        "detail": "Voucher yang digenerate berhasil divalidasi."
+    },
+    {
+        "test": "Voucher generator (image)",
+        "status": "FAIL",
+        "detail": "Gagal generate image voucher: None {'error': 'Expecting value: line 1 column 1 (char 0)'}"
     }
 ]

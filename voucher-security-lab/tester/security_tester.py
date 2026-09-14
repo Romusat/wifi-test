@@ -196,6 +196,49 @@ else:
 
 
 # --------------------------------------------------
+# 8. Voucher Generation (Text format)
+# --------------------------------------------------
+def generate_vouchers(count, output_format="text"):
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/voucher/generate",
+            json={"count": count, "format": output_format, "length": 6, "prefix": "GEN-"},
+            timeout=5
+        )
+        return response.status_code, response.json()
+    except Exception as e:
+        return None, {"error": str(e)}
+
+status, body = generate_vouchers(2, "text")
+if status == 200 and body.get("success"):
+    codes = body.get("vouchers", [])
+    if len(codes) == 2 and codes[0].startswith("GEN-"):
+        record("Voucher generator (text)", "PASS", f"Berhasil membuat 2 voucher text: {codes}")
+        # Test validation for generated voucher
+        v_status, v_body = send(codes[0])
+        if v_status == 200:
+            record("Generated voucher validation", "PASS", "Voucher yang digenerate berhasil divalidasi.")
+        else:
+            record("Generated voucher validation", "FAIL", "Voucher yang digenerate gagal divalidasi.")
+    else:
+        record("Voucher generator (text)", "FAIL", "Response success tapi data tidak sesuai.")
+else:
+    record("Voucher generator (text)", "FAIL", f"Gagal generate text voucher: {status} {body}")
+
+# --------------------------------------------------
+# 9. Voucher Generation (Image format)
+# --------------------------------------------------
+status, body = generate_vouchers(1, "image")
+if status == 200 and body.get("success"):
+    images = body.get("images", [])
+    if len(images) == 1 and images[0].endswith(".png"):
+        record("Voucher generator (image)", "PASS", f"Berhasil membuat voucher image URL: {images[0]}")
+    else:
+        record("Voucher generator (image)", "FAIL", "Response image tidak valid atau URL salah.")
+else:
+    record("Voucher generator (image)", "FAIL", f"Gagal generate image voucher: {status} {body}")
+
+# --------------------------------------------------
 # Report
 # --------------------------------------------------
 

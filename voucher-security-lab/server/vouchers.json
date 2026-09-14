@@ -1,6 +1,6 @@
 {
   "LAB-TEST-01": {
-    "used": false,
+    "used": true,
     "expires_at": "2099-12-31T23:59:59Z"
   },
   "LAB-USED-01": {
@@ -10,5 +10,29 @@
   "LAB-EXPIRED-01": {
     "used": false,
     "expires_at": "2020-01-01T00:00:00Z"
+  },
+  "GEN-YDTI47": {
+    "used": true,
+    "expires_at": "2026-09-21T07:33:36Z"
+  },
+  "GEN-PJG4H6": {
+    "used": false,
+    "expires_at": "2026-09-21T07:33:36Z"
+  },
+  "GEN-PI6A31": {
+    "used": false,
+    "expires_at": "2026-09-21T07:33:36Z"
+  },
+  "GEN-J197TZ": {
+    "used": true,
+    "expires_at": "2026-09-21T07:36:32Z"
+  },
+  "GEN-ILZ0NW": {
+    "used": false,
+    "expires_at": "2026-09-21T07:36:32Z"
+  },
+  "GEN-ECTWUD": {
+    "used": false,
+    "expires_at": "2026-09-21T07:36:32Z"
   }
 }
