@@ -37,7 +37,7 @@
     {
         "test": "Voucher generator (text)",
         "status": "PASS",
-        "detail": "Berhasil membuat 2 voucher text: ['GEN-J197TZ', 'GEN-ILZ0NW']"
+        "detail": "Berhasil membuat 2 voucher text: ['GEN-EI4DRA', 'GEN-W34L7C']"
     },
     {
         "test": "Generated voucher validation",

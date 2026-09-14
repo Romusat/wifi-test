@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voucher Generator</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-lg max-w-xl w-full p-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Wi‑Fi Voucher Generator</h1>
+    <form id="voucherForm" class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-gray-700">Count</span>
+          <input type="number" name="count" value="1" min="1" max="100" class="mt-1 block w-full rounded border-gray-300" required />
+        </label>
+        <label class="block">
+          <span class="text-gray-700">Length</span>
+          <input type="number" name="length" value="8" min="4" max="16" class="mt-1 block w-full rounded border-gray-300" required />
+        </label>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <label class="block">
+          <span class="text-gray-700">Prefix</span>
+          <input type="text" name="prefix" placeholder="optional" class="mt-1 block w-full rounded border-gray-300" />
+        </label>
+        <label class="block">
+          <span class="text-gray-700">Format</span>
+          <select name="format" class="mt-1 block w-full rounded border-gray-300">
+            <option value="text">Text</option>
+            <option value="image" selected>Image (premium)</option>
+          </select>
+        </label>
+      </div>
+      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded transition">Generate Voucher(s)</button>
+    </form>
+    <div id="result" class="mt-6"></div>
+  </div>
+  <script>
+    const form = document.getElementById('voucherForm');
+    const resultDiv = document.getElementById('result');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(form).entries());
+      data.count = Number(data.count);
+      data.length = Number(data.length);
+      const resp = await fetch('/api/voucher/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const json = await resp.json();
+      if (!json.success) {
+        resultDiv.innerHTML = `<p class="text-red-600">Error: ${json.error}</p>`;
+        return;
+      }
+      let html = `<p class="text-green-700 font-medium mb-2">Generated ${json.vouchers.length} voucher(s):</p>`;
+      if (json.images) {
+        html += json.images.map(url => `<img src="${url}" class="border rounded mb-2 max-w-full"/>`).join('');
+      } else {
+        html += `<pre class="bg-gray-50 p-2 rounded">${json.vouchers.join('\n')}</pre>`;
+      }
+      resultDiv.innerHTML = html;
+    });
+  </script>
+</body>
+</html>
