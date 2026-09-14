@@ -1,0 +1,37 @@
+[
+    {
+        "test": "Empty input validation",
+        "status": "PASS",
+        "detail": "Server menolak kode kosong."
+    },
+    {
+        "test": "Invalid voucher handling",
+        "status": "PASS",
+        "detail": "Invalid voucher ditolak dengan HTTP 401."
+    },
+    {
+        "test": "Valid voucher",
+        "status": "PASS",
+        "detail": "Voucher test diterima."
+    },
+    {
+        "test": "Voucher reuse protection",
+        "status": "PASS",
+        "detail": "Voucher yang sudah digunakan ditolak."
+    },
+    {
+        "test": "Expired voucher",
+        "status": "PASS",
+        "detail": "Voucher expired ditolak."
+    },
+    {
+        "test": "Rate-limit observation",
+        "status": "WARN",
+        "detail": "10 request dummy selesai sangat cepat. Perlu diperiksa apakah server memiliki rate limiting."
+    },
+    {
+        "test": "Information disclosure",
+        "status": "PASS",
+        "detail": "Tidak terlihat informasi error internal."
+    }
+]
