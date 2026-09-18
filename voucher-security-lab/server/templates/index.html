@@ -1,68 +1,337 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voucher Generator</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-  <div class="bg-white rounded-xl shadow-lg max-w-xl w-full p-6">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Wi‑Fi Voucher Generator</h1>
-    <form id="voucherForm" class="space-y-4">
-      <div class="grid grid-cols-2 gap-4">
-        <label class="block">
-          <span class="text-gray-700">Count</span>
-          <input type="number" name="count" value="1" min="1" max="100" class="mt-1 block w-full rounded border-gray-300" required />
-        </label>
-        <label class="block">
-          <span class="text-gray-700">Length</span>
-          <input type="number" name="length" value="8" min="4" max="16" class="mt-1 block w-full rounded border-gray-300" required />
-        </label>
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <label class="block">
-          <span class="text-gray-700">Prefix</span>
-          <input type="text" name="prefix" placeholder="optional" class="mt-1 block w-full rounded border-gray-300" />
-        </label>
-        <label class="block">
-          <span class="text-gray-700">Format</span>
-          <select name="format" class="mt-1 block w-full rounded border-gray-300">
-            <option value="text">Text</option>
-            <option value="image" selected>Image (premium)</option>
-          </select>
-        </label>
-      </div>
-      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 rounded transition">Generate Voucher(s)</button>
-    </form>
-    <div id="result" class="mt-6"></div>
-  </div>
+  <title>Premium Wi-Fi Vouchers</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              500: '#6366f1',
+              600: '#4f46e5',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+    }
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1rem;
+    }
+    #reader {
+      border: none !important;
+    }
+    #reader video {
+      border-radius: 0.75rem;
+    }
+    #reader__scan_region {
+      background: black;
+      border-radius: 0.75rem;
+    }
+    #reader__dashboard_section_csr span button {
+      background-color: #4f46e5 !important;
+      color: white !important;
+      padding: 8px 16px !important;
+      border-radius: 8px !important;
+      border: none !important;
+      margin-top: 10px !important;
+    }
+  </style>
+</head>
+<body class="p-6">
+  <div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <header class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400">Wi-Fi Access Portal</h1>
+        <p class="text-slate-400 mt-1">Premium Voucher Management Dashboard</p>
+      </div>
+      <div class="space-x-4">
+        <button onclick="downloadAll()" class="glass-panel px-4 py-2 hover:bg-slate-800 transition flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Download ZIP
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="statsContainer">
+      <!-- Injected by JS -->
+      <div class="glass-panel p-4 text-center animate-pulse"><div class="h-10 bg-slate-700 rounded w-1/2 mx-auto mb-2"></div></div>
+      <div class="glass-panel p-4 text-center animate-pulse"><div class="h-10 bg-slate-700 rounded w-1/2 mx-auto mb-2"></div></div>
+      <div class="glass-panel p-4 text-center animate-pulse"><div class="h-10 bg-slate-700 rounded w-1/2 mx-auto mb-2"></div></div>
+      <div class="glass-panel p-4 text-center animate-pulse"><div class="h-10 bg-slate-700 rounded w-1/2 mx-auto mb-2"></div></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <!-- Generator Form -->
+      <div class="glass-panel p-6 lg:col-span-1 h-fit">
+        <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Generate New Vouchers
+        </h2>
+        <form id="voucherForm" class="space-y-5">
+          <div class="grid grid-cols-2 gap-4">
+            <label class="block">
+              <span class="text-slate-300 text-sm">Quantity</span>
+              <input type="number" name="count" value="1" min="1" max="100" class="mt-1 w-full bg-slate-800/50 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none" required />
+            </label>
+            <label class="block">
+              <span class="text-slate-300 text-sm">Code Length</span>
+              <input type="number" name="length" value="8" min="4" max="16" class="mt-1 w-full bg-slate-800/50 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none" required />
+            </label>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <label class="block">
+              <span class="text-slate-300 text-sm">Prefix (Opt)</span>
+              <input type="text" name="prefix" placeholder="WIFI-" class="mt-1 w-full bg-slate-800/50 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none" />
+            </label>
+            <label class="block">
+              <span class="text-slate-300 text-sm">Format</span>
+              <select name="format" class="mt-1 w-full bg-slate-800/50 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="image" selected>Premium Card</option>
+                <option value="text">Raw Text</option>
+              </select>
+            </label>
+          </div>
+          <label class="block">
+            <span class="text-slate-300 text-sm">Expires in (Days)</span>
+            <input type="number" name="expires_in_days" value="7" min="1" class="mt-1 w-full bg-slate-800/50 border border-slate-600 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-indigo-500 outline-none" required />
+          </label>
+          <button type="submit" id="generateBtn" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-indigo-500/25 transition-all">
+            Generate Now
+          </button>
+        </form>
+      </div>
+
+      <!-- Preview & Validation -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Generated Results -->
+        <div class="glass-panel p-6 min-h-[300px]">
+          <h2 class="text-xl font-semibold mb-6 flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              Latest Generation
+            </span>
+          </h2>
+          <div id="result" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="col-span-full text-slate-500 flex items-center justify-center h-48 border-2 border-dashed border-slate-700 rounded-xl">
+              Generated vouchers will appear here
+            </div>
+          </div>
+        </div>
+
+        <!-- QR Scanner -->
+        <div class="glass-panel p-6">
+          <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Live QR Validator
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div id="reader" class="overflow-hidden rounded-xl bg-slate-900 w-full min-h-[250px] flex items-center justify-center text-sm text-slate-500"></div>
+            </div>
+            <div class="flex flex-col justify-center">
+              <div id="scanResult" class="p-6 rounded-xl border border-slate-700 bg-slate-800/50 text-center">
+                <p class="text-slate-400">Waiting for scan...</p>
+              </div>
+              
+              <div class="mt-6 border-t border-slate-700 pt-6">
+                <p class="text-sm text-slate-400 mb-2">Or validate manually:</p>
+                <div class="flex gap-2">
+                  <input type="text" id="manualCode" placeholder="Enter voucher code" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 text-white outline-none focus:border-indigo-500" />
+                  <button onclick="validateManual()" class="bg-slate-700 hover:bg-slate-600 px-4 rounded-lg transition">Check</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Fetch stats on load
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/voucher/stats');
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('statsContainer').innerHTML = `
+            <div class="glass-panel p-4 text-center">
+              <div class="text-3xl font-bold text-white">${data.stats.total}</div>
+              <div class="text-slate-400 text-sm mt-1">Total Vouchers</div>
+            </div>
+            <div class="glass-panel p-4 text-center border-b-2 border-emerald-500">
+              <div class="text-3xl font-bold text-emerald-400">${data.stats.active}</div>
+              <div class="text-slate-400 text-sm mt-1">Active</div>
+            </div>
+            <div class="glass-panel p-4 text-center border-b-2 border-indigo-500">
+              <div class="text-3xl font-bold text-indigo-400">${data.stats.used}</div>
+              <div class="text-slate-400 text-sm mt-1">Used</div>
+            </div>
+            <div class="glass-panel p-4 text-center border-b-2 border-rose-500">
+              <div class="text-3xl font-bold text-rose-400">${data.stats.expired}</div>
+              <div class="text-slate-400 text-sm mt-1">Expired</div>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Failed to load stats', err);
+      }
+    }
+    loadStats();
+
+    // Form Submission
     const form = document.getElementById('voucherForm');
     const resultDiv = document.getElementById('result');
+    const btn = document.getElementById('generateBtn');
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      btn.innerHTML = 'Generating...';
+      btn.disabled = true;
+
       const data = Object.fromEntries(new FormData(form).entries());
       data.count = Number(data.count);
       data.length = Number(data.length);
-      const resp = await fetch('/api/voucher/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const json = await resp.json();
-      if (!json.success) {
-        resultDiv.innerHTML = `<p class="text-red-600">Error: ${json.error}</p>`;
-        return;
+      data.expires_in_days = Number(data.expires_in_days);
+
+      try {
+        const resp = await fetch('/api/voucher/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const json = await resp.json();
+        
+        if (!json.success) {
+          resultDiv.innerHTML = `<div class="col-span-full p-4 bg-red-900/50 border border-red-500 rounded text-red-200">Error: ${json.error}</div>`;
+          return;
+        }
+
+        let html = '';
+        if (json.images) {
+          html = json.images.map(url => `
+            <div class="relative group rounded-xl overflow-hidden shadow-lg border border-slate-700">
+              <img src="${url}?t=${Date.now()}" class="w-full h-auto object-cover transition transform group-hover:scale-105" alt="Voucher"/>
+              <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                <a href="${url}" download class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-full font-medium shadow">Download</a>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          html = `<div class="col-span-full bg-slate-900 p-4 rounded-xl border border-slate-700 text-green-400 font-mono shadow-inner whitespace-pre-wrap">${json.vouchers.join('\n')}</div>`;
+        }
+        resultDiv.innerHTML = html;
+        loadStats();
+      } catch (err) {
+        resultDiv.innerHTML = `<div class="col-span-full text-red-400">Request failed.</div>`;
+      } finally {
+        btn.innerHTML = 'Generate Now';
+        btn.disabled = false;
       }
-      let html = `<p class="text-green-700 font-medium mb-2">Generated ${json.vouchers.length} voucher(s):</p>`;
-      if (json.images) {
-        html += json.images.map(url => `<img src="${url}" class="border rounded mb-2 max-w-full"/>`).join('');
-      } else {
-        html += `<pre class="bg-gray-50 p-2 rounded">${json.vouchers.join('\n')}</pre>`;
-      }
-      resultDiv.innerHTML = html;
     });
+
+    // Download ZIP
+    function downloadAll() {
+      window.location.href = '/api/voucher/download';
+    }
+
+    // QR & Validation
+    const scanResultEl = document.getElementById('scanResult');
+    let isProcessing = false;
+
+    async function validateCode(code) {
+      if (isProcessing) return;
+      isProcessing = true;
+      scanResultEl.innerHTML = `<p class="text-indigo-400 animate-pulse">Validating ${code}...</p>`;
+      
+      try {
+        const resp = await fetch('/api/voucher/validate', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({code})
+        });
+        const json = await resp.json();
+        
+        if (json.success) {
+          scanResultEl.innerHTML = `
+            <div class="text-emerald-400 font-bold text-xl mb-1">VALID</div>
+            <p class="text-slate-300">Code: <span class="font-mono bg-slate-900 px-2 py-1 rounded">${code}</span> is ready to use.</p>
+          `;
+          loadStats(); // Update used count
+        } else {
+          let reason = json.error;
+          if (reason === 'voucher_used') reason = 'Already Used';
+          if (reason === 'voucher_expired') reason = 'Expired';
+          if (reason === 'invalid_voucher') reason = 'Not Found';
+          
+          scanResultEl.innerHTML = `
+            <div class="text-rose-400 font-bold text-xl mb-1">INVALID</div>
+            <p class="text-slate-300">Code: <span class="font-mono bg-slate-900 px-2 py-1 rounded">${code}</span></p>
+            <p class="text-rose-400/80 text-sm mt-2">Reason: ${reason}</p>
+          `;
+        }
+      } catch (err) {
+        scanResultEl.innerHTML = `<p class="text-rose-400">Error connecting to server.</p>`;
+      }
+      
+      setTimeout(() => {
+        isProcessing = false;
+      }, 3000);
+    }
+
+    function validateManual() {
+      const input = document.getElementById('manualCode');
+      if (input.value.trim()) {
+        validateCode(input.value.trim());
+        input.value = '';
+      }
+    }
+
+    // Initialize QR Scanner
+    function onScanSuccess(decodedText, decodedResult) {
+      validateCode(decodedText);
+    }
+    
+    // Slight delay to ensure DOM is ready for scanner
+    setTimeout(() => {
+      try {
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+          "reader",
+          { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 },
+          /* verbose= */ false);
+        html5QrcodeScanner.render(onScanSuccess);
+      } catch (e) {
+        document.getElementById('reader').innerHTML = 'Camera access not available.';
+      }
+    }, 500);
+
   </script>
 </body>
 </html>

@@ -37,7 +37,7 @@
     {
         "test": "Voucher generator (text)",
         "status": "PASS",
-        "detail": "Berhasil membuat 2 voucher text: ['GEN-EI4DRA', 'GEN-W34L7C']"
+        "detail": "Berhasil membuat 2 voucher text: ['GEN-5WDSOP', 'GEN-KK7EU2']"
     },
     {
         "test": "Generated voucher validation",
@@ -46,7 +46,7 @@
     },
     {
         "test": "Voucher generator (image)",
-        "status": "FAIL",
-        "detail": "Gagal generate image voucher: None {'error': 'Expecting value: line 1 column 1 (char 0)'}"
+        "status": "PASS",
+        "detail": "Berhasil membuat voucher image URL: /static/vouchers/GEN-24ZIHC.png"
     }
 ]
